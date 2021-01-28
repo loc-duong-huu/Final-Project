@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import SignIn from './components/SignIn.js';
+import SignUp from './components/SignUp.js';
 import ProductList from './components/ProductList.js';
 import ProductDetail from './components/ProductDetail.js';
 import MyCart from './components/MyCart.js';
@@ -13,7 +14,8 @@ const GET_10_BOOKS = "http://duonghuuloc.somee.com/api/Sach/LayThongTinCacSachBa
 const GET_BOOK_DESCRIPTION = "http://duonghuuloc.somee.com/api/Sach/LayThongTinSachTheoId/";
 
 function App() {
-  const [screen, screenTransfer] = useState("ProductList");
+  const [auth, setAuth] = useState(localStorage.getItem("Auth"));
+  const [screen, screenTransfer] = useState('');
   const [books, setBooks] = useState([]);
   const [book, setBook] = useState('');
   const [carts, setCarts] = useState([]);
@@ -29,6 +31,13 @@ function App() {
     .then(jsonResponse => {
       setBooks(jsonResponse);
     });
+
+    if (auth === null) {
+      screenTransfer("SignIn");
+    }
+    else {
+      screenTransfer("ProductList");
+    }
   }, []);
 
   function ViewOneProduct(productId) {
@@ -83,11 +92,28 @@ function App() {
 
   // Show screen
   switch (screen) {
+    case "SignIn":
+      return (
+        <div>
+          <SignIn onSuccess={(e) => { localStorage.setItem("Auth", e); screenTransfer("ProductList") }}
+                  onSignUp={() => { screenTransfer("SignUp") } } />
+        </div>
+      );
+
+    case "SignUp":
+      return (
+        <div>
+          <SignUp onSuccess={(e) => { localStorage.setItem("Auth", e); screenTransfer("ProductList") }}
+                  onSignIn={() => { screenTransfer("SignIn") } } />
+        </div>
+      );
+
     case "ProductList":
       return (
         <div>
           <ProductList books={books} 
                        onView={(productId) => { ViewOneProduct(productId) }}
+                       onLogout={() => { localStorage.removeItem("Auth"); screenTransfer("SignIn") }}
                        onShowCart={() => { screenTransfer("MyCart") }}
                        footerName={footerName}
                        footerDescription={footerDescription} />
@@ -98,6 +124,7 @@ function App() {
       return (
         <div>
           <ProductDetail book={book}
+                         onLogout={() => { localStorage.removeItem("Auth"); screenTransfer("SignIn") }}
                          onAddToCart={(productItem) => { AddOneProduct(productItem) }}
                          onBackToBooks={() => { screenTransfer("ProductList") }}
                          onShowCart={() => { screenTransfer("MyCart") }}
@@ -112,6 +139,7 @@ function App() {
           <MyCart carts={carts}
                   tax={tax}
                   onBackToBooks={() => { screenTransfer("ProductList") }}
+                  onLogout={() => { localStorage.removeItem("Auth"); screenTransfer("SignIn") }}
                   onDecreaseQuantity={(Id) => { onDecreaseQuantity(Id) }}
                   onIncreaseQuantity={(Id) => { onIncreaseQuantity(Id) }}
                   onRemoveItem={(Id) => { onRemoveItem(Id) }}

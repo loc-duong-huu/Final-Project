@@ -67,6 +67,7 @@ const ProductList = props => {
           <Typography className={classes.title} variant="h6" color="inherit" noWrap>
             Books List
           </Typography>
+          <Button color="inherit" onClick={() => props.onLogout()}>Logout</Button>
           <Button color="inherit" onClick={() => props.onShowCart()}><ShoppingBasketIcon className={classes.icon} />My Cart</Button>
         </Toolbar>
       </AppBar>
